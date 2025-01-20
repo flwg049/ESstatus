@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ground Team Status Board</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+        td {
+            background-color: #f9f9f9;
+        }
+        .status-active {
+            color: green;
+            font-weight: bold;
+        }
+        .status-inactive {
+            color: red;
+            font-weight: bold;
+        }
+        .refresh-btn {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .refresh-btn:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Ground Team Status Board</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th>Team Name</th>
+                    <th>Status</th>
+                    <th>Responsible Officer</th>
+                </tr>
+            </thead>
+            <tbody id="statusTable">
+                <!-- 데이터가 여기에 동적으로 추가됩니다 -->
+            </tbody>
+        </table>
+        <button class="refresh-btn" onclick="refreshStatus()">Refresh Status</button>
+    </div>
+
+    <script>
+        const groundTeams = [
+            { name: "Team Alpha", status: "Active", officer: "John Doe" },
+            { name: "Team Bravo", status: "Inactive", officer: "Jane Smith" },
+            { name: "Team Charlie", status: "Active", officer: "Sam Lee" },
+            { name: "Team Delta", status: "Inactive", officer: "Alice Kim" },
+        ];
+
+        function renderStatusBoard() {
+            const statusTable = document.getElementById("statusTable");
+            statusTable.innerHTML = ""; // 기존 데이터를 초기화
+
+            groundTeams.forEach(team => {
+                const row = document.createElement("tr");
+
+                // 팀 이름
+                const nameCell = document.createElement("td");
+                nameCell.textContent = team.name;
+
+                // 상태
+                const statusCell = document.createElement("td");
+                statusCell.textContent = team.status;
+                statusCell.className = team.status === "Active" ? "status-active" : "status-inactive";
+
+                // 담당자
+                const officerCell = document.createElement("td");
+                officerCell.textContent = team.officer;
+
+                row.appendChild(nameCell);
+                row.appendChild(statusCell);
+                row.appendChild(officerCell);
+
+                statusTable.appendChild(row);
+            });
+        }
+
+        function refreshStatus() {
+            // 여기에서 상태 업데이트 로직을 추가하거나, 상태를 동적으로 변경할 수 있습니다.
+            alert("Status board has been refreshed!");
+            renderStatusBoard();
+        }
+
+        // 페이지 로드 시 초기화
+        renderStatusBoard();
+    </script>
+</body>
+</html>
