@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ground Team Status</title>
+    <title>Emergency Service Duty Status Board</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -37,16 +37,7 @@
             background-color: #007bff;
             color: white;
         }
-        .status-active {
-            color: green;
-            font-weight: bold;
-        }
-        .status-inactive {
-            color: red;
-            font-weight: bold;
-        }
     </style>
-    <!-- Firebase -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
         import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-database.js";
@@ -70,9 +61,9 @@
         // Load teams from Firebase
         function loadTeams() {
             const teamRef = ref(database, "groundTeams");
+            const tableBody = document.getElementById("statusTable");
             onValue(teamRef, (snapshot) => {
                 const data = snapshot.val();
-                const tableBody = document.getElementById("statusTable");
                 tableBody.innerHTML = ""; // Clear previous data
                 if (data) {
                     Object.values(data).forEach((team) => {
@@ -80,29 +71,33 @@
                         row.innerHTML = `
                             <td>${team.name}</td>
                             <td class="${team.status === "Active" ? "status-active" : "status-inactive"}">${team.status}</td>
-                            <td>${team.officer}</td>
+                            <td>${team.teamLead}</td>
+                            <td>${team.dutyStart}</td>
+                            <td>${team.dutyEnd}</td>
                         `;
                         tableBody.appendChild(row);
                     });
                 } else {
-                    tableBody.innerHTML = "<tr><td colspan='3'>No teams available</td></tr>";
+                    tableBody.innerHTML = "<tr><td colspan='5'>No teams available</td></tr>";
                 }
             });
         }
 
-        // Initialize on page load
+        // Load teams on page load
         window.onload = loadTeams;
     </script>
 </head>
 <body>
     <div class="container">
-        <h1>Ground Team Status</h1>
+        <h1>Emergency Service Duty Status Board</h1>
         <table>
             <thead>
                 <tr>
                     <th>Team Name</th>
                     <th>Status</th>
-                    <th>Responsible Officer</th>
+                    <th>Team Lead</th>
+                    <th>Duty Start</th>
+                    <th>Duty End</th>
                 </tr>
             </thead>
             <tbody id="statusTable"></tbody>
