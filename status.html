@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ground Team Status</title>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -13,7 +11,16 @@
             padding: 20px;
             background-color: #f9f9f9;
         }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
         h1 {
+            text-align: center;
             color: #333;
         }
         table {
@@ -39,8 +46,12 @@
             font-weight: bold;
         }
     </style>
-    <script>
-        // Firebase 설정
+    <!-- Firebase -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-database.js";
+
+        // Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyBFXaNXUL_ToRZi1fKuiyZyN5yQWyP6ZnA",
             authDomain: "esstatus-acb54.firebaseapp.com",
@@ -52,52 +63,50 @@
             measurementId: "G-DMTZH06RR3"
         };
 
-        // Firebase 초기화
-        const app = firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
 
-        // Firebase에서 데이터 가져오기 및 렌더링
-        function loadFromFirebase() {
-            const statusTable = document.getElementById("statusTable");
-
-            // 데이터 가져오기
-            firebase.database().ref("groundTeams").on("value", (snapshot) => {
-                const teams = snapshot.val();
-                statusTable.innerHTML = ""; // 기존 데이터 초기화
-
-                if (teams) {
-                    teams.forEach((team) => {
+        // Load teams from Firebase
+        function loadTeams() {
+            const teamRef = ref(database, "groundTeams");
+            onValue(teamRef, (snapshot) => {
+                const data = snapshot.val();
+                const tableBody = document.getElementById("statusTable");
+                tableBody.innerHTML = ""; // Clear previous data
+                if (data) {
+                    Object.values(data).forEach((team) => {
                         const row = document.createElement("tr");
                         row.innerHTML = `
                             <td>${team.name}</td>
-                            <td class="${team.status === 'Active' ? 'status-active' : 'status-inactive'}">
-                                ${team.status}
-                            </td>
+                            <td class="${team.status === "Active" ? "status-active" : "status-inactive"}">${team.status}</td>
                             <td>${team.officer}</td>
                         `;
-                        statusTable.appendChild(row);
+                        tableBody.appendChild(row);
                     });
                 } else {
-                    statusTable.innerHTML = "<tr><td colspan='3'>No data available</td></tr>";
+                    tableBody.innerHTML = "<tr><td colspan='3'>No teams available</td></tr>";
                 }
             });
         }
 
-        // 페이지 로드 시 데이터 로드
-        window.onload = loadFromFirebase;
+        // Initialize on page load
+        window.onload = loadTeams;
     </script>
 </head>
 <body>
-    <h1>Ground Team Status</h1>
-    <table>
-        <thead>
-            <tr>
-                <th>Team Name</th>
-                <th>Status</th>
-                <th>Responsible Officer</th>
-            </tr>
-        </thead>
-        <tbody id="statusTable"></tbody>
-    </table>
+    <div class="container">
+        <h1>Ground Team Status</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th>Team Name</th>
+                    <th>Status</th>
+                    <th>Responsible Officer</th>
+                </tr>
+            </thead>
+            <tbody id="statusTable"></tbody>
+        </table>
+    </div>
 </body>
 </html>
