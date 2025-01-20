@@ -3,18 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ground Team Status Board</title>
+    <title>Ground Team Status</title>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
             padding: 20px;
             background-color: #f9f9f9;
-        }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            text-align: center;
         }
         h1 {
             color: #333;
@@ -33,9 +30,6 @@
             background-color: #007bff;
             color: white;
         }
-        td {
-            background-color: #f9f9f9;
-        }
         .status-active {
             color: green;
             font-weight: bold;
@@ -44,81 +38,66 @@
             color: red;
             font-weight: bold;
         }
-        .refresh-btn {
-            margin-top: 20px;
-            padding: 10px 20px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-        .refresh-btn:hover {
-            background-color: #0056b3;
-        }
     </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Ground Team Status Board</h1>
-        <table>
-            <thead>
-                <tr>
-                    <th>Team Name</th>
-                    <th>Status</th>
-                    <th>Responsible Officer</th>
-                </tr>
-            </thead>
-            <tbody id="statusTable">
-                <!-- 데이터가 여기에 동적으로 추가됩니다 -->
-            </tbody>
-        </table>
-        <button class="refresh-btn" onclick="refreshStatus()">Refresh Status</button>
-    </div>
-
     <script>
-        const groundTeams = [
-            { name: "Team Alpha", status: "Active", officer: "John Doe" },
-            { name: "Team Bravo", status: "Inactive", officer: "Jane Smith" },
-            { name: "Team Charlie", status: "Active", officer: "Sam Lee" },
-            { name: "Team Delta", status: "Inactive", officer: "Alice Kim" },
-        ];
+        // Firebase 설정
+        const firebaseConfig = {
+            apiKey: "AIzaSyBFXaNXUL_ToRZi1fKuiyZyN5yQWyP6ZnA",
+            authDomain: "esstatus-acb54.firebaseapp.com",
+            databaseURL: "https://esstatus-acb54-default-rtdb.firebaseio.com",
+            projectId: "esstatus-acb54",
+            storageBucket: "esstatus-acb54.firebasestorage.app",
+            messagingSenderId: "402865427495",
+            appId: "1:402865427495:web:6ffd207d1a4a079f5e6a02",
+            measurementId: "G-DMTZH06RR3"
+        };
 
-        function renderStatusBoard() {
+        // Firebase 초기화
+        const app = firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // Firebase에서 데이터 가져오기 및 렌더링
+        function loadFromFirebase() {
             const statusTable = document.getElementById("statusTable");
-            statusTable.innerHTML = ""; // 기존 데이터를 초기화
 
-            groundTeams.forEach(team => {
-                const row = document.createElement("tr");
+            // 데이터 가져오기
+            firebase.database().ref("groundTeams").on("value", (snapshot) => {
+                const teams = snapshot.val();
+                statusTable.innerHTML = ""; // 기존 데이터 초기화
 
-                // 팀 이름
-                const nameCell = document.createElement("td");
-                nameCell.textContent = team.name;
-
-                // 상태
-                const statusCell = document.createElement("td");
-                statusCell.textContent = team.status;
-                statusCell.className = team.status === "Active" ? "status-active" : "status-inactive";
-
-                // 담당자
-                const officerCell = document.createElement("td");
-                officerCell.textContent = team.officer;
-
-                row.appendChild(nameCell);
-                row.appendChild(statusCell);
-                row.appendChild(officerCell);
-
-                statusTable.appendChild(row);
+                if (teams) {
+                    teams.forEach((team) => {
+                        const row = document.createElement("tr");
+                        row.innerHTML = `
+                            <td>${team.name}</td>
+                            <td class="${team.status === 'Active' ? 'status-active' : 'status-inactive'}">
+                                ${team.status}
+                            </td>
+                            <td>${team.officer}</td>
+                        `;
+                        statusTable.appendChild(row);
+                    });
+                } else {
+                    statusTable.innerHTML = "<tr><td colspan='3'>No data available</td></tr>";
+                }
             });
         }
 
-        function refreshStatus() {
-            // 여기에서 상태 업데이트 로직을 추가하거나, 상태를 동적으로 변경할 수 있습니다.
-            alert("Status board has been refreshed!");
-            renderStatusBoard();
-        }
-
-        // 페이지 로드 시 초기화
-        renderStatusBoard();
+        // 페이지 로드 시 데이터 로드
+        window.onload = loadFromFirebase;
     </script>
+</head>
+<body>
+    <h1>Ground Team Status</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Team Name</th>
+                <th>Status</th>
+                <th>Responsible Officer</th>
+            </tr>
+        </thead>
+        <tbody id="statusTable"></tbody>
+    </table>
 </body>
 </html>
