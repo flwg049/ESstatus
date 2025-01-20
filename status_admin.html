@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ground Team Admin</title>
+    <title>Emergency Service Duty Status Board</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -107,11 +107,13 @@
         function addTeam() {
             const name = document.getElementById("teamName").value.trim();
             const status = document.getElementById("teamStatus").value;
-            const officer = document.getElementById("teamOfficer").value.trim();
+            const teamLead = document.getElementById("teamLead").value.trim();
+            const dutyStart = document.getElementById("dutyStart").value;
+            const dutyEnd = document.getElementById("dutyEnd").value;
 
-            if (name && officer) {
+            if (name && teamLead && dutyStart && dutyEnd) {
                 const teamRef = ref(database, "groundTeams");
-                push(teamRef, { name, status, officer })
+                push(teamRef, { name, status, teamLead, dutyStart, dutyEnd })
                     .then(() => {
                         alert("Team added successfully!");
                         document.getElementById("addTeamForm").reset();
@@ -143,7 +145,13 @@
                                 </select>
                             </td>
                             <td>
-                                <input type="text" id="officer-${key}" value="${team.officer}" />
+                                <input type="text" id="lead-${key}" value="${team.teamLead}" />
+                            </td>
+                            <td>
+                                <input type="date" id="start-${key}" value="${team.dutyStart}" />
+                            </td>
+                            <td>
+                                <input type="date" id="end-${key}" value="${team.dutyEnd}" />
                             </td>
                             <td>
                                 <button class="action-btn edit-btn" onclick="editTeam('${key}')">Edit</button>
@@ -153,7 +161,7 @@
                         tableBody.appendChild(row);
                     });
                 } else {
-                    tableBody.innerHTML = "<tr><td colspan='4'>No teams available</td></tr>";
+                    tableBody.innerHTML = "<tr><td colspan='6'>No teams available</td></tr>";
                 }
             });
         }
@@ -161,15 +169,17 @@
         // Edit team in Firebase
         function editTeam(key) {
             const status = document.getElementById(`status-${key}`).value;
-            const officer = document.getElementById(`officer-${key}`).value.trim();
+            const teamLead = document.getElementById(`lead-${key}`).value.trim();
+            const dutyStart = document.getElementById(`start-${key}`).value;
+            const dutyEnd = document.getElementById(`end-${key}`).value;
 
-            if (officer) {
+            if (teamLead && dutyStart && dutyEnd) {
                 const teamRef = ref(database, `groundTeams/${key}`);
-                update(teamRef, { status, officer })
+                update(teamRef, { status, teamLead, dutyStart, dutyEnd })
                     .then(() => alert("Team updated successfully!"))
                     .catch((error) => alert("Failed to update team: " + error.message));
             } else {
-                alert("Officer field cannot be empty.");
+                alert("Please fill out all fields.");
             }
         }
 
@@ -194,14 +204,17 @@
 </head>
 <body>
     <div class="container">
-        <h1>Ground Team Admin</h1>
+        <h1>Emergency Service Duty Status Board</h1>
         <form id="addTeamForm" class="form-container">
             <input type="text" id="teamName" placeholder="Enter team name" required />
             <select id="teamStatus">
                 <option value="Active">Active</option>
                 <option value="Inactive">Inactive</option>
             </select>
-            <input type="text" id="teamOfficer" placeholder="Enter responsible officer" required />
+            <input type="text" id="teamLead" placeholder="Enter team lead" required />
+            <label>Duty Period:</label>
+            <input type="date" id="dutyStart" required />
+            <input type="date" id="dutyEnd" required />
             <button type="button" class="add-btn" onclick="addTeam()">Add Team</button>
         </form>
         <table>
@@ -209,7 +222,9 @@
                 <tr>
                     <th>Team Name</th>
                     <th>Status</th>
-                    <th>Responsible Officer</th>
+                    <th>Team Lead</th>
+                    <th>Duty Start</th>
+                    <th>Duty End</th>
                     <th>Actions</th>
                 </tr>
             </thead>
