@@ -12,7 +12,7 @@
             background-color: #f9f9f9;
         }
         .container {
-            max-width: 900px;
+            max-width: 800px;
             margin: 0 auto;
             background-color: #fff;
             padding: 20px;
@@ -20,8 +20,8 @@
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
         h1 {
-            color: #333;
             text-align: center;
+            color: #333;
         }
         table {
             width: 100%;
@@ -37,135 +37,79 @@
             background-color: #007bff;
             color: white;
         }
-        .refresh-btn, .add-btn {
-            margin: 10px 5px;
-            padding: 10px 20px;
-            background-color: #007bff;
+        .add-form input, .add-form select {
+            margin: 5px 0;
+            padding: 10px;
+            width: calc(100% - 20px);
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .add-btn {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #28a745;
             color: white;
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            font-size: 16px;
-        }
-        .refresh-btn:hover, .add-btn:hover {
-            background-color: #0056b3;
-        }
-        .form-container {
-            margin-top: 20px;
-            text-align: left;
-        }
-        input, select {
-            padding: 10px;
-            width: calc(100% - 22px);
-            margin: 5px 0;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 16px;
-        }
-        .add-btn {
-            background-color: #28a745;
+            width: 100%;
         }
         .add-btn:hover {
             background-color: #218838;
         }
     </style>
-    <!-- Firebase CDN -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
-    <script>
-        // Firebase 설정
+    <!-- Firebase -->
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
+        import { getDatabase, ref, set, push, onValue } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-database.js";
+
+        // Your Firebase configuration
         const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_AUTH_DOMAIN",
-            databaseURL: "YOUR_DATABASE_URL",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_STORAGE_BUCKET",
-            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-            appId: "YOUR_APP_ID"
+            apiKey: "AIzaSyBFXaNXUL_ToRZi1fKuiyZyN5yQWyP6ZnA",
+            authDomain: "esstatus-acb54.firebaseapp.com",
+            databaseURL: "https://esstatus-acb54-default-rtdb.firebaseio.com",
+            projectId: "esstatus-acb54",
+            storageBucket: "esstatus-acb54.firebasestorage.app",
+            messagingSenderId: "402865427495",
+            appId: "1:402865427495:web:6ffd207d1a4a079f5e6a02",
+            measurementId: "G-DMTZH06RR3"
         };
 
-        // Firebase 초기화
-        firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
 
-        const groundTeams = [];
-
+        // Add team to Firebase
         function addTeam() {
             const name = document.getElementById("teamName").value.trim();
             const status = document.getElementById("teamStatus").value;
             const officer = document.getElementById("teamOfficer").value.trim();
 
             if (name && officer) {
-                groundTeams.push({ name, status, officer });
-                saveToFirebase();
-                renderStatusBoard();
+                const teamRef = ref(database, "groundTeams");
+                push(teamRef, { name, status, officer });
                 alert("Team added successfully!");
+                document.getElementById("addTeamForm").reset();
             } else {
                 alert("Please fill out all fields.");
             }
         }
-
-        function saveToFirebase() {
-            firebase.database().ref("groundTeams").set(groundTeams, (error) => {
-                if (error) {
-                    alert("Failed to save data: " + error.message);
-                } else {
-                    console.log("Data saved successfully!");
-                }
-            });
-        }
-
-        function loadFromFirebase() {
-            firebase.database().ref("groundTeams").on("value", (snapshot) => {
-                const data = snapshot.val();
-                if (data) {
-                    groundTeams.length = 0;
-                    groundTeams.push(...data);
-                    renderStatusBoard();
-                }
-            });
-        }
-
-        function renderStatusBoard() {
-            const statusTable = document.getElementById("statusTable");
-            statusTable.innerHTML = ""; // 기존 데이터를 초기화
-
-            groundTeams.forEach((team) => {
-                const row = document.createElement("tr");
-                row.innerHTML = `
-                    <td>${team.name}</td>
-                    <td>${team.status}</td>
-                    <td>${team.officer}</td>
-                `;
-                statusTable.appendChild(row);
-            });
-        }
-
-        window.onload = loadFromFirebase;
     </script>
 </head>
 <body>
     <div class="container">
         <h1>Ground Team Admin</h1>
-        <table>
-            <thead>
-                <tr>
-                    <th>Team Name</th>
-                    <th>Status</th>
-                    <th>Responsible Officer</th>
-                </tr>
-            </thead>
-            <tbody id="statusTable"></tbody>
-        </table>
-        <div class="form-container">
-            <input type="text" id="teamName" placeholder="Enter team name" />
+        <form id="addTeamForm" class="add-form">
+            <input type="text" id="teamName" placeholder="Team Name" required />
             <select id="teamStatus">
                 <option value="Active">Active</option>
                 <option value="Inactive">Inactive</option>
             </select>
-            <input type="text" id="teamOfficer" placeholder="Enter responsible officer" />
-            <button class="add-btn" onclick="addTeam()">Add Team</button>
-        </div>
+            <input type="text" id="teamOfficer" placeholder="Responsible Officer" required />
+            <button type="button" class="add-btn" onclick="addTeam()">Add Team</button>
+        </form>
     </div>
 </body>
 </html>
