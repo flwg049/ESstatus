@@ -9,7 +9,7 @@
             font-family: Arial, sans-serif;
             margin: 20px;
             padding: 20px;
-            background-color: #ffffff;
+            background-color: #f9f9f9;
         }
         .container {
             max-width: 800px;
@@ -36,6 +36,18 @@
         th {
             background-color: #007bff;
             color: white;
+        }
+        .team-name {
+            font-weight: bold;
+            color: black;
+        }
+        .status-active {
+            font-weight: bold;
+            color: green;
+        }
+        .status-inactive {
+            font-weight: bold;
+            color: red;
         }
     </style>
     <script type="module">
@@ -69,8 +81,10 @@
                     Object.values(data).forEach((team) => {
                         const row = document.createElement("tr");
                         row.innerHTML = `
-                            <td>${team.name}</td>
-                            <td class="${team.status === "Active" ? "status-active" : "status-inactive"}">${team.status}</td>
+                            <td class="team-name">${team.name}</td>
+                            <td class="${team.status === "Active" ? "status-active" : "status-inactive"}">
+                                ${team.status}
+                            </td>
                             <td>${team.teamLead}</td>
                             <td>${team.dutyStart}</td>
                             <td>${team.dutyEnd}</td>
