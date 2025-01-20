@@ -37,14 +37,6 @@
             background-color: #007bff;
             color: white;
         }
-        .status-active {
-            color: green;
-            font-weight: bold;
-        }
-        .status-inactive {
-            color: red;
-            font-weight: bold;
-        }
         .refresh-btn, .add-btn {
             margin: 10px 5px;
             padding: 10px 20px;
@@ -76,20 +68,8 @@
         .add-btn:hover {
             background-color: #218838;
         }
-        .action-btn {
-            padding: 5px 10px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        .delete-btn {
-            background-color: #dc3545;
-            color: white;
-        }
-        .delete-btn:hover {
-            background-color: #bd2130;
-        }
     </style>
+    <!-- Firebase CDN -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
     <script>
@@ -101,71 +81,14 @@
             projectId: "YOUR_PROJECT_ID",
             storageBucket: "YOUR_STORAGE_BUCKET",
             messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-            appId: "YOUR_APP_ID",
-            measurementId: "YOUR_MEASUREMENT_ID"
+            appId: "YOUR_APP_ID"
         };
 
         // Firebase 초기화
-        const app = firebase.initializeApp(firebaseConfig);
+        firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
         const groundTeams = [];
-
-        function renderStatusBoard() {
-            const statusTable = document.getElementById("statusTable");
-            statusTable.innerHTML = ""; // 기존 데이터를 초기화
-
-            groundTeams.forEach((team, index) => {
-                const row = document.createElement("tr");
-
-                // 팀 이름
-                const nameCell = document.createElement("td");
-                nameCell.textContent = team.name;
-
-                // 상태 (드롭다운 메뉴로 표시)
-                const statusCell = document.createElement("td");
-                const statusSelect = document.createElement("select");
-                ["Active", "Inactive"].forEach(optionValue => {
-                    const option = document.createElement("option");
-                    option.value = optionValue;
-                    option.textContent = optionValue;
-                    if (optionValue === team.status) {
-                        option.selected = true;
-                    }
-                    statusSelect.appendChild(option);
-                });
-                statusSelect.onchange = () => {
-                    team.status = statusSelect.value;
-                    updateStatusCellStyle(statusCell, team.status);
-                };
-                updateStatusCellStyle(statusCell, team.status);
-                statusCell.appendChild(statusSelect);
-
-                // 담당자
-                const officerCell = document.createElement("td");
-                officerCell.textContent = team.officer;
-
-                // 액션 버튼 (삭제)
-                const actionCell = document.createElement("td");
-                const deleteButton = document.createElement("button");
-                deleteButton.textContent = "Remove";
-                deleteButton.className = "action-btn delete-btn";
-                deleteButton.onclick = () => removeTeam(index);
-                actionCell.appendChild(deleteButton);
-
-                row.appendChild(nameCell);
-                row.appendChild(statusCell);
-                row.appendChild(officerCell);
-                row.appendChild(actionCell);
-
-                statusTable.appendChild(row);
-            });
-        }
-
-        function updateStatusCellStyle(cell, status) {
-            cell.className = "";
-            cell.classList.add(status === "Active" ? "status-active" : "status-inactive");
-        }
 
         function addTeam() {
             const name = document.getElementById("teamName").value.trim();
@@ -174,18 +97,12 @@
 
             if (name && officer) {
                 groundTeams.push({ name, status, officer });
-                renderStatusBoard();
                 saveToFirebase();
+                renderStatusBoard();
                 alert("Team added successfully!");
             } else {
                 alert("Please fill out all fields.");
             }
-        }
-
-        function removeTeam(index) {
-            groundTeams.splice(index, 1); // 팀 삭제
-            renderStatusBoard(); // 테이블 재렌더링
-            saveToFirebase();
         }
 
         function saveToFirebase() {
@@ -209,25 +126,36 @@
             });
         }
 
-        // 페이지 로드 시 초기화
+        function renderStatusBoard() {
+            const statusTable = document.getElementById("statusTable");
+            statusTable.innerHTML = ""; // 기존 데이터를 초기화
+
+            groundTeams.forEach((team) => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${team.name}</td>
+                    <td>${team.status}</td>
+                    <td>${team.officer}</td>
+                `;
+                statusTable.appendChild(row);
+            });
+        }
+
         window.onload = loadFromFirebase;
     </script>
 </head>
 <body>
     <div class="container">
-        <h1>Dynamic Ground Team Admin</h1>
+        <h1>Ground Team Admin</h1>
         <table>
             <thead>
                 <tr>
                     <th>Team Name</th>
                     <th>Status</th>
                     <th>Responsible Officer</th>
-                    <th>Action</th>
                 </tr>
             </thead>
-            <tbody id="statusTable">
-                <!-- 데이터가 여기에 동적으로 추가됩니다 -->
-            </tbody>
+            <tbody id="statusTable"></tbody>
         </table>
         <div class="form-container">
             <input type="text" id="teamName" placeholder="Enter team name" />
